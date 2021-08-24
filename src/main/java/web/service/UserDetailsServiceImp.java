@@ -16,11 +16,7 @@ public class UserDetailsServiceImp implements UserDetailsService {
     @Transactional(readOnly=true)
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        UserDetails ret = us.findByUsername(username);
-//        System.out.println(ret.getUsername());
-//        System.out.println(ret.getPassword());
-//        System.out.println(ret.getAuthorities());
-//        return ret;
+
         return (UserDetails) us.findByUsername(username);
     }
 }

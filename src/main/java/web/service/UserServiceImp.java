@@ -1,58 +1,66 @@
 package web.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import web.dao.UserDao;
+import web.dao.UserRepository;
 import web.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImp implements UserService {
-   @Autowired
-   private UserDao userDao;
 
-   @Transactional
+   private final UserRepository userRep;
+   private final PasswordEncoder passEncoder;
+
+   @Autowired
+   public UserServiceImp(UserRepository userRep, PasswordEncoder passwordEncoder) {
+      this.userRep = userRep;
+      this.passEncoder = passwordEncoder;
+   }
+
    @Override
    public void create(User user) {
-      userDao.create(user);
+      user.setPassword(passEncoder.encode(user.getPassword()));
+      userRep.save(user);
    }
 
-   @Transactional
    @Override
    public void update(User user) {
-      userDao.update(user);
+      if(user.getPassword().length() != 0){
+         user.setPassword(passEncoder.encode(user.getPassword()));
+      }else {
+         user.setPassword(findById(user.getId()).getPassword());
+      }
+      userRep.save(user);
    }
 
-   @Transactional
    @Override
    public void delete(User user) {
-      userDao.delete(user);
+      userRep.delete(user);
    }
 
-   @Transactional
    @Override
    public void deleteById(Long id) {
-      userDao.deleteById(id);
+         userRep.deleteById(id);
    }
 
-   @Transactional(readOnly = true)
    @Override
    public User findById(Long id) {
-      return userDao.findById(id);
+      Optional<User> opt = userRep.findById(id);
+      return (User) opt.orElse(null);
    }
 
-   @Transactional(readOnly = true)
    @Override
    public List<User> listUsers() {
-      return userDao.listUsers();
+      return userRep.findAll();
    }
 
-   @Transactional(readOnly = true)
    @Override
    public User findByUsername(String username) {
-      return userDao.findByUsername(username);
+      return userRep.findByUsername(username);
    }
 
 }
